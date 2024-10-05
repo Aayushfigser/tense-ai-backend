@@ -18,7 +18,8 @@ const futureRoutes = require('./routes/futureRoutes');
 const ideasRoutes = require('./routes/ideasRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-
+const rlRoutes = require('./routes/rlRoutes');
+const fusionRoutes = require('./routes/fusionRoutes'); // Add this line if missing
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -44,6 +45,9 @@ app.use('/api/present', presentRoutes);
 app.use('/api/future', futureRoutes);
 app.use('/api/ideas', ideasRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/rl', rlRoutes); // API endpoint for RL
+// Use the fusion routes
+app.use('/api', fusionRoutes);
 
 
 
