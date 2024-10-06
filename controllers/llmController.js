@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 
-// Call Gemma LLM (Python)
+// Call Gemma LLM (Python) 
 const callGemmaLLM = async (prompt) => {
     return new Promise((resolve, reject) => {
         const pythonProcess = spawn('python', ['utils/gemmaModel.py', prompt]);
