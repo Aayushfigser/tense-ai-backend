@@ -4,7 +4,7 @@ import requests
 import json
 import sys
 
-API_KEY = "AIzaSyB-wqbFfoubsd2AP9_m_38Itg0bfxKlA1Q"  
+API_KEY = "ask-for-key-to-ayush"  
 
 def call_gemini_api(content):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={API_KEY}"
