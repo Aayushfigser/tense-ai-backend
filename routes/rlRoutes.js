@@ -1,4 +1,3 @@
-//rlRoutes.js
 const express = require('express');
 const { updateRL } = require('../controllers/rlController');
 const { protect } = require('../middleware/authMiddleware');
