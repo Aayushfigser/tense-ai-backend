@@ -7,24 +7,23 @@ require('dotenv').config();
 const connectDB = require('./config/db');
 const { protect } = require('./middleware/authMiddleware');
 const { errorHandler } = require('./middleware/errorMiddleware');
-
+const nlpRoutes = require('./routes/nlpRoutes');
 
 // Import routes
 const efficiencyRoutes = require('./routes/efficiencyRoutes');
 const routineRoutes = require('./routes/routineRoutes');
-const pastRoutes = require('./routes/pastRoutes');
-const presentRoutes = require('./routes/presentRoutes');
-const futureRoutes = require('./routes/futureRoutes');
-const ideasRoutes = require('./routes/ideasRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const rlRoutes = require('./routes/rlRoutes');
-const fusionRoutes = require('./routes/fusionRoutes'); // Add this line if missing
+const fusionRoutes = require('./routes/fusionRoutes');
+const llmRoutes = require('./routes/llmRoutes');
 
+
+// Primary App for the API
 const app = express();
-const port = process.env.PORT || 5000;
+const apiPort = process.env.PORT || 5000;
 
-// Middleware to handle CORS
+// Middleware to handle CORS for API
 app.use(cors({
   origin: ['http://localhost:3000', 'http://192.168.43.110:3000'], // allow both localhost and your network IP
   credentials: true,
@@ -36,22 +35,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Connect to MongoDB
 connectDB();  // Using the connectDB function from config/db.js
 
-// Routes
+// API Routes
 app.use('/api/efficiency', efficiencyRoutes);
 app.use('/api/routines', routineRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/past', pastRoutes);
-app.use('/api/present', presentRoutes);
-app.use('/api/future', futureRoutes);
-app.use('/api/ideas', ideasRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/rl', rlRoutes); // API endpoint for RL
-// Use the fusion routes
-app.use('/api', fusionRoutes);
-
-
-
-
+app.use('/api/rl', rlRoutes); 
+app.use('/api', fusionRoutes); 
+app.use('/api/llm', llmRoutes);
+app.use('/api/nlp', nlpRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -65,6 +57,9 @@ app.use((err, req, res, next) => {
 
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Start the API Server
+app.listen(apiPort, () => {
+  console.log(`API Server running on port ${apiPort}`);
 });
+
+
