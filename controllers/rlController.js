@@ -23,23 +23,28 @@ const updateRL = async (req, res) => {
         }
 
         // Call Python RL Agent with current state and action
-        const pythonProcess = spawn('python', ['path/to/rlAgent.py', JSON.stringify(state), action]);
+        const pythonProcess = spawn('python', ['utils/rlAgent.py', JSON.stringify(state), action]);
 
         pythonProcess.stdout.on('data', async (data) => {
-            const rlOutput = JSON.parse(data.toString());  // Parse Python RL output
+            try {
+                const rlOutput = JSON.parse(data.toString());  // Parse Python RL output
 
-            // Update Q-table and state in the MongoDB document
-            rlModel.qTable = rlOutput.qTable;  // Assuming the Python script returns an updated Q-table
-            rlModel.state = rlOutput.state;
+                // Update Q-table and state in the MongoDB document
+                rlModel.qTable = rlOutput.qTable;  // Update the Q-table from RL agent's output
+                rlModel.state = rlOutput.state;  // Update the state
 
-            // If feedback is provided, incorporate it into the agent's learning
-            if (reward !== null) {
-                rlModel.qTable = await applyFeedback(rlModel.qTable, action, reward);
+                // If feedback is provided, incorporate it into the agent's learning
+                if (reward !== null) {
+                    rlModel.qTable = await applyFeedback(rlModel.qTable, action, reward);
+                }
+
+                await rlModel.save();  // Save updated RL model to MongoDB
+
+                res.status(200).json({ message: 'RL agent updated', rlOutput });
+            } catch (parseError) {
+                console.error('Error parsing RL output:', parseError);
+                res.status(500).json({ error: 'Failed to parse RL output' });
             }
-
-            await rlModel.save();  // Save updated RL model to MongoDB
-
-            res.status(200).json({ message: 'RL agent updated', rlOutput });
         });
 
         pythonProcess.stderr.on('data', (error) => {
@@ -58,7 +63,8 @@ const applyFeedback = async (qTable, action, reward) => {
     const actionIndex = ['recommend_goal', 'provide_feedback', 'ask_for_input', 'recommend_insights'].indexOf(action);
     if (actionIndex >= 0) {
         // Apply learning rule (like Q-learning) to update Q-table based on feedback (reward)
-        qTable[state][actionIndex] += reward;  // Adjust this to match the RL logic
+        const currentState = Math.floor(Math.random() * 10);  // You may want to get the current state properly
+        qTable[currentState][actionIndex] += reward;  // Adjust this to match the RL logic
     }
     return qTable;
 };
