@@ -1,18 +1,11 @@
 // routes/presentRoutes.js
-
 const express = require('express');
-const callGeminiAPI = require('../utils/geminiAPI');
+const {  analyzePresent } = require('../controllers/presentController');
+const { protect } = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-    try {
-        const { text } = req.body;
-        const plan = await callGeminiAPI({ prompt: text });
-        res.json(plan);
-    } catch (error) {
-        console.error('Error generating present plan:', error.message);
-        res.status(500).json({ error: 'Failed to generate plan' });
-    }
-});
+// Route to get present response
+router.post('/present', protect, analyzePresent);
 
 module.exports = router;
