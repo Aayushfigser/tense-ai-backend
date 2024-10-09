@@ -1,32 +1,35 @@
-// controllers/presentController.js
-const { text } = require('body-parser');
-const { callGeminiAPI } = require('../utils/geminiAPI');
+const { fusionLayer } = require('./fusionController');
+const Conversation = require('../models/conversationModel');
 
-exports.createPresentPrompt = async (req, res) => {
-  try {
-    const { prompt, userId } = req.body;
+// Handles user input for present analysis
+const analyzePresent = async (req, res) => {
+    try {
+        const { text, userId } = req.body;
+        
+        // Retrieve past conversation context
+        const userConversations = await Conversation.find({ userId });
 
-    // Prepare the data to send to Gemini API
-    const data = {
-      prompt: {
-        text: prompt
-      }
-    };
+        // Use the fusion layer to analyze user input
+        const fusionResponse = await fusionLayer({
+            state: userConversations,
+            action: 'analyze_present',
+            textPrompt: text
+        });
 
-    // Call the Gemini API
-    const result = await callGeminiAPI(data);
+        // Save this interaction in the database
+        const newConversation = new Conversation({
+            userId,
+            input: text,
+            output: fusionResponse.total,
+            task: 'present'
+        });
+        await newConversation.save();
 
-    // Assuming the response structure from Gemini API
-    const presentData = {
-      userId,
-      prompt,
-      plan: result.candidates[0].text, // Replace with actual fields from response
-    };
-
-    // Save to DB if necessary, or directly return the response
-    res.status(201).json(presentData);
-  } catch (error) {
-    console.error('Error generating present plan:', error.message);
-    res.status(500).json({ error: 'Failed to generate plan' });
-  }
+        // Respond back to the user
+        res.status(200).json(fusionResponse);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to analyze present situation' });
+    }
 };
+
+module.exports = { analyzePresent };
