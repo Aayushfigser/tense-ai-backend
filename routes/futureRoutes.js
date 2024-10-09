@@ -1,19 +1,12 @@
-// routes/futureRoutes.js
 
+// routes/futureRoutes.js
 const express = require('express');
-const callGeminiAPI = require('../utils/geminiAPI');
+const { analyzeFuture } = require('../controllers/futureController');
+const { protect } = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-    try {
-        const { vision } = req.body;
-        const data = { prompt: vision };
-        const possibilities = await callGeminiAPI(data);
-        res.json(possibilities);
-    } catch (error) {
-        console.error('Error exploring future possibilities:', error.message);
-        res.status(500).json({ error: 'Failed to explore future possibilities' });
-    }
-});
+// Route to get future response
+router.post('/future', protect, analyzeFuture);
 
 module.exports = router;
