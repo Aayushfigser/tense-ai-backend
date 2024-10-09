@@ -1,5 +1,35 @@
+//This is working properly so, it is ready to use for initial stage 
+
 const { spawn } = require('child_process');
 const axios = require('axios');
+
+
+// training our own data aswell which is responses for specific queries
+const predefinedResponses = (text) => {
+    const queries = {
+        'what is tenseai': "TenseAI is an artificial research company co-founded by Ayush Maurya, Deependra Maurya, and Bhanu Paliwal.",
+        'who are you': "Hi, I am TenseAI, here to help with daily life use and making things simpler for you.",
+        'who is co-founder of tenseai': "TenseAI was co-founded by Ayush Maurya, Deependra Maurya, and Bhanu Paliwal.",
+        'introduce yourself': "Hi, I am TenseAI, designed to assist you in managing your life better.",
+        'give me brief of tenseai': "TenseAI is focused on advancing artificial intelligence for better life management, founded by Ayush Maurya, Deependra Maurya, and Bhanu Paliwal.",
+        'who is ayush maurya' : "ayush maurya is co-founder and CEO of Tenseai, author and he was common visionary boy.",
+        'how to build tenseai' :"yes, you can build tenseai but think if you build tenseai you copy me, so why you copy me when i am here the real with you",
+        'tenseai ko kisne bnaya': " Tenseai software ko ayush maurya, deependra maurya and bhanu paliwal ne bnaya h.",
+        'Tum jo aye zindagi mein': "tu btt bngayi, but tell me how can i help you",
+        'updates about 2024': "Here are some updates about 2024: International Year of Camelids, The UN has designated 2024 as the International Year of Camelids. Camels, llamas, alpacas, vicuñas, and guanacos are important sources of livelihood for many families in dryland and mountainous rangeland ecosystems. Global economy. The World Economic Outlook (WEO) projects global growth to be 3.2% in 2024 and 3.3% in 2025. However, geopolitical tensions, rising shipping costs, and emerging industrial policies could reshape global trade patterns. J.P. Morgan Research estimates a 35% chance that the global economy will enter a recession by the end of 2024. International student visas, the UK's new regulations for international students will impact those arriving after January 2024. Dependents who have already been living in the UK with the student will be able to apply for a dependant visa to stay in the UK after the student switches to a Post-Study Work (PSW) visa. Elections More than 70 countries will hold elections in 2024, which could test the democratic system. International days Some important international days include International Day for Peace, International Women's Day, World Anti-Tobacco Day, World Environment Day, and International Yoga Day. Summer Paralympics The 2024 Summer Paralympics will be held in Paris, France from August 28 to September 8. "
+    };
+
+    // Normalize the user input
+    const normalizedText = text.toLowerCase().trim();
+
+    // Return the corresponding predefined response, or null if no match is found
+    return queries[normalizedText] || null;
+};
+
+
+
+
+
 
 // Function to call the Gemini API via Python script
 const callGeminiAPI = (content) => {
@@ -85,6 +115,19 @@ const fusionLayer = async (req, res) => {
     const { state, action, textPrompt, alpha } = req.body;
 
     try {
+        // Step 1: Check for predefined responses
+        const predefinedResponse = predefinedResponses(textPrompt);
+
+        if (predefinedResponse) {
+            // If we find a predefined response, return it without invoking the RL agent or LLM
+            res.status(200).json({
+                message: predefinedResponse,
+                source: 'predefined'
+            });
+            return;
+        }
+
+    
         // Step 1: Call RL Agent
         const rlProcess = spawn('python', ['utils/rlAgent.py', JSON.stringify(state), action]);
 
