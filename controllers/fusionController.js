@@ -30,9 +30,6 @@ const predefinedResponses = (text) => {
 
 
 
-
-
-
 // Function to call the Gemini API via Python script
 const callGeminiAPI = (content) => {
     return new Promise((resolve, reject) => {
