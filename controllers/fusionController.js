@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const axios = require('axios');
 
 
-// training our own data aswell which is responses for specific queries
+// training our own data aswell which are responses for specific queries
 const predefinedResponses = (text) => {
     const queries = {
         'what is tenseai': "TenseAI is an artificial research company co-founded by Ayush Maurya, Deependra Maurya, and Bhanu Paliwal.",
