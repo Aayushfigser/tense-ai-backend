@@ -1,34 +1,35 @@
-// controllers/futureController.js
-const { vision } = require('googleapis/build/src/apis/vision');
-const { callGeminiAPI } = require('../utils/geminiAPI');
-const { text } = require('body-parser');
+const { fusionLayer } = require('./fusionController');
+const Conversation = require('../models/conversationModel');
 
-exports.createFuturePrompt = async (req, res) => {
-  try {
-    const { prompt, userId } = req.body;
+// Handles user input for analyzing past experiences
+const analyzePast = async (req, res) => {
+    try {
+        const { text, userId } = req.body;
+        
+        // Retrieve past conversation context
+        const userConversations = await Conversation.find({ userId });
 
-    // Prepare the data to send to Gemini API
-    const data = {
-      prompt: {
-        vision: prompt
-      }
-    };
+        // Use the fusion layer to analyze user input
+        const fusionResponse = await fusionLayer({
+            state: userConversations,
+            action: 'analyze_past',
+            textPrompt: text
+        });
 
-    // Call the Gemini API
-    const result = await callGeminiAPI(data);
+        // Save this interaction in the database
+        const newConversation = new Conversation({
+            userId,
+            input: text,
+            output: fusionResponse.total,
+            task: 'past'
+        });
+        await newConversation.save();
 
-    // Assuming the response structure from Gemini API
-    const futureData = {
-      userId,
-      prompt,
-      roadmaps: result.candidates[0].text, // Replace with actual fields from response
-      successRate: result.successRate || 100 // Dummy success rate if not provided
-    };
-
-    // Save to DB if necessary, or directly return the response
-    res.status(201).json(futureData);
-  } catch (error) {
-    console.error('Error analyzing future possibilities:', error.message);
-    res.status(500).json({ error: 'Failed to explore future possibilities' });
-  }
+        // Respond back to the user
+        res.status(200).json(fusionResponse);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to analyze past experience' });
+    }
 };
+
+module.exports = { analyzePast };
