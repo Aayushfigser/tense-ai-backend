@@ -5,7 +5,7 @@
 import speech_recognition as sr
 
 # Function to capture live audio from the microphone
-def capture_audio():
+def listen_voice():
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
@@ -22,5 +22,5 @@ def capture_audio():
         return ""
     
 if __name__ == "__main__":
-    captured_text = capture_audio()
+    captured_text = listen_voice()
     print(f"Captured Text: {captured_text}")
