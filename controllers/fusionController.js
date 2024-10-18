@@ -109,21 +109,17 @@ const callNLPProcessing = (text, task) => {
     });
 };
 
-// Fusion Layer to combine RL Agent, LLM outputs, and NLP Analysis
-const fusionLayer = async (req, res) => {
-    const { state, action, textPrompt, alpha } = req.body;
-
+const fusionLogic = async ({state, action, textPrompt}) => {
     try {
         // Step 1: Check for predefined responses
         const predefinedResponse = predefinedResponses(textPrompt);
 
         if (predefinedResponse) {
             // If we find a predefined response, return it without invoking the RL agent or LLM
-            res.status(200).json({
+            return {
                 message: predefinedResponse,
                 source: 'predefined'
-            });
-            return;
+            };
         }
 
     
@@ -156,24 +152,36 @@ const fusionLayer = async (req, res) => {
                     alpha || 0.2
                 );
 
-                res.status(200).json({
+                resolve({
                     fusedResponse,
                     sentiment: sentimentAnalysis.result,
                     intent: intentClassification.result
                 });
             } catch (error) {
                 console.error('Error in calling LLM or NLP:', error);
-                res.status(500).json({ error: 'Failed to call LLM or NLP', details: error.message });
+                reject(new Error('Error in LLM or NLP process: ' + error.message));
             }
         });
 
         rlProcess.stderr.on('data', (error) => {
             console.error(`Error running RL Agent: ${error}`);
-            res.status(500).json({ error: 'Failed to run RL Agent' });
+            reject(new Error(`Error running RL Agent: ${error}`));
         });
     } catch (error) {
         console.error('Error in fusionLayer:', error);
-        res.status(500).json({ error: 'Fusion Layer failed' });
+        throw new Error('Fusion Logic failed: ' + error.message);
+    }
+}
+
+// Fusion Layer to combine RL Agent, LLM outputs, and NLP Analysis
+const fusionLayer = async (req, res) => {
+    const { state, action, textPrompt } = req.body;
+    try {
+        const fusionResponse = await fusionLogic(state, action, textPrompt);
+        res.status(200).json(fusionResponse);
+    } catch (error) {
+        console.error('Error in fusionLayer:', error);
+        res.status(500).json({ error: 'Fusion Layer failed', details: error.message });
     }
 };
 
@@ -203,4 +211,4 @@ const feedbackController = async (req, res) => {
     }
 };
 
-module.exports = { fusionLayer, feedbackController };
+module.exports = { fusionLayer, fusionLogic, feedbackController };

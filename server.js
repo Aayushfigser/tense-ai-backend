@@ -17,6 +17,9 @@ const userRoutes = require('./routes/userRoutes');
 const rlRoutes = require('./routes/rlRoutes');
 const fusionRoutes = require('./routes/fusionRoutes');
 const llmRoutes = require('./routes/llmRoutes');
+const pastRoutes = require('./routes/pastRoutes');
+const presentRoutes = require('./routes/presentRoutes');
+const futureRoutes = require('./routes/futureRoutes');
 
 
 // Primary App for the API
@@ -44,6 +47,9 @@ app.use('/api/rl', rlRoutes);
 app.use('/api', fusionRoutes); 
 app.use('/api/llm', llmRoutes);
 app.use('/api/nlp', nlpRoutes);
+app.use('/api', pastRoutes);
+app.use('/api', presentRoutes);
+app.use('/api', futureRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

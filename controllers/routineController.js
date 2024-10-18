@@ -35,7 +35,8 @@ const setRoutine = asyncHandler(async (req, res) => {
         duration,
         selectedDate,
         type,
-        takeHelp
+        takeHelp,
+        completed: false
     });
 
     const createRoutine = await routine.save();
@@ -47,14 +48,42 @@ const setRoutine = asyncHandler(async (req, res) => {
 // @route   PUT /api/routines/:id
 // @access  Private
 const updateRoutine = asyncHandler(async (req, res) => {
-    res.status(200).json({ message: `Update routine ${req.params.id}` });
+    const { id }  = req.params
+    const { completed } = req.body
+
+    try{
+        const updatedRoutine = await Routine.findByIdAndUpdate(
+            id,
+            {completed : completed}
+        );
+        if (!updatedRoutine) {
+            return res.status(404).json({message: "Routine not found"})
+        };
+
+        res.status(200).json(updatedRoutine);
+    }catch(error){
+        res.status(500).json({message: "Error updating routine", error})
+    }
 });
 
 // @desc    Delete a routine
 // @route   DELETE /api/routines/:id
 // @access  Private
 const deleteRoutine = asyncHandler(async (req, res) => {
-    res.status(200).json({ message: `Delete routine ${req.params.id}` });
+    const { id } = req.params;
+
+    try {
+        // Find the routine by ID and delete it from the database
+        const deletedRoutine = await Routine.findByIdAndDelete(id);
+
+        if (!deletedRoutine) {
+            return res.status(404).json({ message: "Routine not found" });
+        }
+
+        res.status(200).json({ message: "Routine deleted successfully", deletedRoutine });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting routine", error });
+    }
 });
 
 module.exports = {

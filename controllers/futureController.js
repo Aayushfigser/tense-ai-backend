@@ -1,18 +1,19 @@
-const { fusionLayer } = require('./fusionController');
-const Conversation = require('../models/conversationModel');
+const { fusionLogic } = require('./fusionController');
+const Conversation = require('../models/coversationModel');
 
 // Handles user input for analyzing past experiences
-const analyzePast = async (req, res) => {
+const analyzeFuture = async (req, res) => {
     try {
-        const { text, userId } = req.body;
+        const userId = req._id
+        const text = req.body.text
         
         // Retrieve past conversation context
         const userConversations = await Conversation.find({ userId });
 
         // Use the fusion layer to analyze user input
-        const fusionResponse = await fusionLayer({
+        const fusionResponse = await fusionLogic({
             state: userConversations,
-            action: 'analyze_past',
+            action: 'analyze_future',
             textPrompt: text
         });
 
@@ -20,16 +21,16 @@ const analyzePast = async (req, res) => {
         const newConversation = new Conversation({
             userId,
             input: text,
-            output: fusionResponse.total,
-            task: 'past'
+            output: fusionResponse.message,
+            task: 'future'
         });
         await newConversation.save();
 
         // Respond back to the user
         res.status(200).json(fusionResponse);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to analyze past experience' });
+        res.status(500).json({ error: 'Failed to analyze future vision' });
     }
 };
 
-module.exports = { analyzePast };
+module.exports = { analyzeFuture };

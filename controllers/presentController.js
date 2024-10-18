@@ -1,16 +1,17 @@
-const { fusionLayer } = require('./fusionController');
-const Conversation = require('../models/conversationModel');
+const { fusionLogic } = require('./fusionController');
+const Conversation = require('../models/coversationModel');
 
 // Handles user input for present analysis
 const analyzePresent = async (req, res) => {
     try {
-        const { text, userId } = req.body;
+        const userId = req._id
+        const text = req.body.text
         
         // Retrieve past conversation context
         const userConversations = await Conversation.find({ userId });
 
         // Use the fusion layer to analyze user input
-        const fusionResponse = await fusionLayer({
+        const fusionResponse = await fusionLogic({
             state: userConversations,
             action: 'analyze_present',
             textPrompt: text
@@ -20,9 +21,10 @@ const analyzePresent = async (req, res) => {
         const newConversation = new Conversation({
             userId,
             input: text,
-            output: fusionResponse.total,
+            output: fusionResponse.message,
             task: 'present'
         });
+
         await newConversation.save();
 
         // Respond back to the user

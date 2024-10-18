@@ -12,12 +12,8 @@ const efficiencySchema = mongoose.Schema(
       type: Date,
       required: true
     },
-    score: {
+    percentage: {
       type: Number,
-      required: true
-    },
-    data: {
-      type: String,
       required: true
     }
   },

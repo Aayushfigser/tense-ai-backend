@@ -26,6 +26,10 @@ const routineSchema = mongoose.Schema(
         takeHelp :{
             type: Boolean,
             required: false
+        },
+        completed :{
+            type: Boolean,
+            required: false
         }
     },
     {
